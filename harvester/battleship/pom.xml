@@ -1,0 +1,178 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <jetty.version>9.2.2.v20140723</jetty.version>
+    <failsafe.version>2.17</failsafe.version>
+    <junit.version>4.12-beta-1</junit.version>
+    <ghostdriver.version>1.1.0</ghostdriver.version>
+    <phantomjs.version>1.9.7</phantomjs.version>
+    <phantomjs.plugin.version>0.4</phantomjs.plugin.version>
+  </properties>
+
+  <groupId>yts</groupId>
+  <artifactId>crawler</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>crawler</name>
+  <url>http://maven.apache.org</url>
+
+  <dependencies>
+	<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+    <dependency>
+	    <groupId>org.jsoup</groupId>
+	    <artifactId>jsoup</artifactId>
+	    <version>1.11.3</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+	<dependency>
+	    <groupId>org.xerial</groupId>
+	    <artifactId>sqlite-jdbc</artifactId>
+	    <version>3.25.2</version>
+	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/com.codeborne/phantomjsdriver -->
+	<dependency>
+	    <groupId>com.codeborne</groupId>
+	    <artifactId>phantomjsdriver</artifactId>
+	    <version>1.4.4</version>
+	</dependency>
+	
+	<dependency>
+   		<groupId>io.github.bonigarcia</groupId>
+  	 	<artifactId>webdrivermanager</artifactId>
+    	<version>3.3.0</version>
+	</dependency>	
+
+	
+	
+	<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+	<dependency>
+	    <groupId>org.seleniumhq.selenium</groupId>
+	    <artifactId>selenium-java</artifactId>
+	    <version>3.141.59</version>
+	</dependency>
+	
+	
+	<dependency>
+	  <groupId>junit</groupId>
+	  <artifactId>junit</artifactId>
+	  <version>4.11</version>
+	</dependency>
+
+  </dependencies>
+  <build>
+  	<plugins>
+  		<!-- Installs PhantomJS so it doesn't have to be pre-installed -->
+  		 <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.1</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+  	
+  	
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-shade-plugin</artifactId>
+  			<version>2.3</version>
+  		</plugin>
+  		
+  		<!-- Get two free ports for our test server to use -->
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>1.6</version>
+    <configuration>
+        <portNames>
+            <portName>jetty.port</portName>
+            <portName>jetty.port.stop</portName>
+        </portNames>
+    </configuration>
+
+</plugin>
+<!-- Use failsafe to run our integration tests -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-failsafe-plugin</artifactId>
+    <version>${failsafe.version}</version>
+    <configuration>
+        <systemPropertyVariables>
+            <phantomjs.binary>${phantomjs.binary}</phantomjs.binary>
+        </systemPropertyVariables>
+    </configuration>
+    <executions>
+        <execution>
+            <id>integration-test</id>
+            <goals>
+                <goal>integration-test</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>verify</id>
+            <goals>
+                <goal>verify</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+<!-- Use a Jetty test server to serve our test content -->
+<plugin>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-maven-plugin</artifactId>
+    <version>${jetty.version}</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+    </dependencies>
+    <configuration>
+        <jvmArgs>-Djetty.port=${jetty.port}</jvmArgs>
+        <stopKey>ANY_KEY_HERE_IS_FINE</stopKey>
+        <stopPort>${jetty.port.stop}</stopPort>
+    </configuration>
+    <executions>
+        <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+            <configuration>
+                <daemon>true</daemon>
+            </configuration>
+        </execution>
+        <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+            <goals>
+                <goal>stop</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
+  	</plugins>
+  </build>
+</project>
